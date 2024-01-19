@@ -2,6 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 type Mode = 'production' | 'development';
 
@@ -13,6 +14,7 @@ interface EnvVariables {
 export default (env: EnvVariables) => {
 
   const isDev = env.mode === 'development';
+  const isProd = env.mode === 'production';
 
   const config: webpack.Configuration = {
     mode: env.mode ?? 'development',
@@ -24,9 +26,21 @@ export default (env: EnvVariables) => {
     },
     plugins: [
       new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') }),
+      isProd && new MiniCssExtractPlugin({
+        filename: 'css/[name].[contenthash:8].css',
+        chunkFilename: 'css/[name].[contenthash:8].css',
+      })
     ],
     module: {
       rules: [
+        {
+          test: /\.s[ac]ss$/i,
+          use: [
+            isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+            "css-loader",
+            "sass-loader",
+          ],
+        },
         {
           // ts-loader
           // если бы мы не использовали typescript: нужен был бы babael-loader

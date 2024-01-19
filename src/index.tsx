@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import './App.css';
+import { createRoot } from "react-dom/client";
+import { App } from "./components/App"
 
-export const App = () => {
-  const [count, setCount] = useState<number>(0);
+const root = document.getElementById('root')
 
-  const increment = () => setCount(prev => prev + 1)
-
-  return (
-    <div>
-      <h1>{count}</h1>
-      <button onClick={increment}>inc</button>
-    </div>
-  )
+if (!root) {
+  throw new Error('root not found')
 }
+
+const container = createRoot(root)
+
+container.render(<App />)
