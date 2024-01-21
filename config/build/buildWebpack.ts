@@ -1,27 +1,29 @@
-import path from 'path';
 import webpack from 'webpack';
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import { buildDevServer } from './buildDevserver';
-import { buildLoaders } from './buildLoader';
+import { buildDevServer } from './buildDevServer';
+import { buildLoaders } from './buildLoaders';
 import { buildPlugins } from './buildPlugins';
+import { buildResolvers } from './buildResolvers';
+import { BuildOptions } from './types/types';
 
 
-export function buildWebpack(options): webpack.Configuration {
+export function buildWebpack(options: BuildOptions): webpack.Configuration {
+  const { mode, paths } = options
+  const isDev = mode === 'development';
+
   return {
-    mode: env.mode ?? 'development',
-    entry: path.resolve(__dirname, 'src', 'index.tsx'),
+    mode: mode ?? 'development',
+    entry: paths.entry,
     output: {
-      path: path.resolve(__dirname, 'build'),
+      path: paths.output,
       filename: '[name].[contenthash].js',
       clean: true
     },
-    plugins: buildPlugins(),
+    plugins: buildPlugins(options),
     module: {
-      rules: buildLoaders(),
+      rules: buildLoaders(options),
     },
-    resolve:
-      devtool: isDev? 'inline-source-map': false,
-    devServer: isDev ? buildDevServer : undefined,
+    resolve: buildResolvers(options),
+    devtool: isDev && 'inline-source-map',
+    devServer: isDev ? buildDevServer(options) : undefined,
   }
 }
