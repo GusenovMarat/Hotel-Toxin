@@ -1,6 +1,8 @@
 import { ModuleOptions } from "webpack";
-import { BuildOptions } from "./types/types";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import ReactRefreshTupescript from "react-refresh-typescript";
+import { BuildOptions } from "./types/types";
+
 
 export function buildLoaders(options: BuildOptions): ModuleOptions['rules'] {
   const isDev = options.mode === 'development';
@@ -54,12 +56,24 @@ export function buildLoaders(options: BuildOptions): ModuleOptions['rules'] {
     ],
   }
 
-  const tsLoader = {
-    // ts-loader
-    // если бы мы не использовали typescript: нужен был бы babael-loader
-    test: /\.tsx?$/,
-    use: 'ts-loader',
+	const tsLoader = {
+		// ts-loader
+		// если бы мы не использовали typescript: нужен был бы babael-loader
     exclude: /node_modules/,
+		test: /\.tsx?$/,
+		use: [
+			{
+				loader: 'ts-loader',
+				options: {
+						transpileOnly: true,
+						getCustomTransformers: () => (
+						{
+							before: [isDev && ReactRefreshTupescript()].filter(Boolean),
+						}
+					)
+				}
+			}
+		]
   }
 
   return [
